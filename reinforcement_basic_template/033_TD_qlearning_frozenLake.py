@@ -7,7 +7,6 @@
 # HFFG       (G: goal, where the frisbee is located)
 
 
-
 #Algorithm parameters: step size alpha, small e>0
 
 
