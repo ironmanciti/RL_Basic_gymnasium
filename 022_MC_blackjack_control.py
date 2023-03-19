@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 
 #state : (player card sum, dealer open card, usable_ace 보유) ex) (6, 1, False)
-win = 0
-lose = 0
-draw = 0
+win_cnt = 0
+lose_cnt = 0
+draw_cnt = 0
 GAMMA = 1  # no discount
 #Algorithm parameter: small e > 0
 e = 0.2 
@@ -33,7 +33,7 @@ for i in range(num_episodes):
     s, _ = env.reset()
     while True:
         p = pi[s]
-        a = np.random.choice(np.arange(len(p)), p=p)  # 0:stick, 1:hit
+        a = np.random.choice(np.arange(num_actions), p=p)  # 0:stick, 1:hit
         s_, r, terminated, truncated, _ = env.step(a)
         #s:(sum_hand(player), dealer open card, usable_ace 보유)
         episode.append((s, a, r))
@@ -41,11 +41,11 @@ for i in range(num_episodes):
             # 80% episode 동안 policy 개선된 후 win/lose count
             if i > 0.8 * num_episodes: 
                 if r == 1:
-                    win += 1
+                    win_cnt += 1
                 elif r == -1:
-                    lose += 1
+                    lose_cnt += 1
                 else:
-                    draw += 1
+                    draw_cnt += 1
             break
         s = s_
         
@@ -78,9 +78,9 @@ for i in range(num_episodes):
     if i % 5000 == 0:
         print(f"episode {i} completed...")
 
-print("win ratio = {:.2f}%".format(win/(0.2 * num_episodes)*100))
-print("lose ratio = {:.2f}%".format(lose/(0.2 * num_episodes)*100))
-print("draw ratio = {:.2f}%".format(draw/(0.2 * num_episodes)*100))
+print("win ratio = {:.2f}%".format(win_cnt/(0.2 * num_episodes)*100))
+print("lose ratio = {:.2f}%".format(lose_cnt/(0.2 * num_episodes)*100))
+print("draw ratio = {:.2f}%".format(draw_cnt/(0.2 * num_episodes)*100))
 
 # prediction
 sample_state = (21, 3, True)

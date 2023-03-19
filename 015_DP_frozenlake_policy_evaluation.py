@@ -21,20 +21,23 @@ env.P[0][0]
 """
 import gymnasium as gym
 import numpy as np
+import pprint
 
-env = gym.make('FrozenLake-v1', is_slippery=False)
+env = gym.make('FrozenLake-v1', is_slippery=True)
 
 GAMMA = 1.0
 THETA = 1e-5
 num_states = env.observation_space.n
 num_actions = env.action_space.n
 transitions = env.P 
+#환경의 dynamics 출력
+pprint.pprint(transitions)
 
 #Input pi, the policy to be evaluated 
-policy = np.ones([num_states, num_actions]) * 0.25
+pi = np.ones([num_states, num_actions]) * 0.25  #Random policy로 초기화
 
 # initialize an array V(s) = 0 for all s in S+
-V = np.zeros(num_states)
+V = np.zeros(num_states)  
 
 #Loop
 while True:
@@ -46,10 +49,10 @@ while True:
         old_value = V[s]
         new_value = 0
         #update rule : V(s) = sum(pi(a|s)*sum(p(s,a)*[r + gamma*v(s')]))
-        for a, prob_action in enumerate(policy[s]):
+        for a, prob_a in enumerate(pi[s]):
             # sum over s', r
-            for prob, s_, reward, _ in transitions[s][a]:
-                new_value += prob_action * prob * (reward + GAMMA * V[s_])
+            for prob, s_, r, _ in transitions[s][a]:
+                new_value += prob_a * prob * (r + GAMMA * V[s_])
         V[s] = new_value
         #delta <- max(delta|v - V(s)|)
         delta = max(delta, np.abs(old_value - V[s]))

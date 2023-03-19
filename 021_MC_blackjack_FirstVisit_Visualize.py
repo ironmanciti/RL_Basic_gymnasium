@@ -30,7 +30,7 @@ V = defaultdict(float)
 Returns = defaultdict(list)
 
 # Loop forever(for each episode)
-for _ in range(num_episodes):
+for i in range(num_episodes):
     #Generate an episode following pi: S0,A0,R1,S1,A1,R2,..ST-1,AT-1,RT
     episode = []
     s, _ = env.reset()
@@ -61,7 +61,9 @@ for _ in range(num_episodes):
             Returns[s].append(G)
             #V(S_t) <- average(Returns(S_t))
             V[s] = np.mean(Returns[s])
-            visited_states.append(s)     
+            visited_states.append(s)   
+    if i % 5000 == 0:
+        print(f"episode {i} completed...")
 
 print('stick threshold = {}'.format(stick_threshold))
 print("win ratio = {:.2f}%".format(win_cnt/num_episodes*100))
@@ -77,16 +79,16 @@ print(f"     player가 손에 {sample_state[0]}를 들고 dealer가 {sample_stat
   
 #시각화
 X, Y = np.meshgrid(
-    np.arange(1, 11),    # dealer가 open 한 card (1~10)
-    np.arange(12, 22))   # player가 가진 card 합계 (12~21)
+    np.arange(12, 22),   # player가 가진 card 합계 (12~21)
+    np.arange(1, 11))    # dealer가 open 한 card (1~10)
          
 #V[(sum_hand(player), dealer open card, usable_ace 보유)]
-no_usable_ace = np.apply_along_axis(lambda idx: V[(idx[1], idx[0], False)], 
+no_usable_ace = np.apply_along_axis(lambda idx: V[(idx[0], idx[1], False)], 
                                     2, np.dstack([X, Y]))
-usable_ace    = np.apply_along_axis(lambda idx: V[(idx[1], idx[0], True)], 
+usable_ace    = np.apply_along_axis(lambda idx: V[(idx[0], idx[1], True)], 
                                     2, np.dstack([X, Y]))
     
-fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12, 3), 
+fig, (ax0, ax1) = plt.subplots(1, 2, figsize=(12, 4), 
                                subplot_kw={'projection': '3d'})
 
 ax1.plot_surface(X, Y, usable_ace, cmap=plt.cm.YlGnBu_r)

@@ -40,9 +40,10 @@ while True:
     delta = 0
     #Loop for each s
     for s in range(num_states):
+        # v <- V(s)
         old_value = V[s]
         new_action_values = np.zeros(num_actions)
-        #V(s) = sum(pi(a|s)*sum(p(s,a)*[r + gamma*v(s')]))
+        #V(s) = max_a(sum(p(s,a)*[r + gamma*v(s')]))
         for a in range(num_actions):
             # sum over s', r
             for prob, s_, r, _ in transitions[s][a]:
@@ -58,8 +59,9 @@ while True:
 pi = np.zeros((num_states, num_actions))
 
 for s in range(num_states):
+    #pi(s) = argmax_a(sum(p(s,a)*[r + gamma*v(s')]))
     action_values = np.zeros(num_actions)
-    
+
     for a in range(num_actions):
         # sum over s', r
         for prob, s_, r, _ in transitions[s][a]:

@@ -33,8 +33,8 @@ n_states = env.observation_space.n  # 500
 n_actions = env.action_space.n      # 6
 
 #Algorithm parameter: step size alpha (0,1], small e > 0
-gamma = 0.99  # time decay
-alpha = 0.9  # learning rate
+GAMMA = 0.99  # time decay
+ALPHA = 0.9  # learning rate
 epsilon = 0.7 # exploration start
 epsilon_final = 0.1
 epsilon_decay = 0.9999
@@ -42,23 +42,21 @@ epsilon_decay = 0.9999
 Q = defaultdict(lambda: np.zeros(n_actions))
 
 n_episodes = 1000
-rendering = False  #episode 시각화 여부
 
 scores = []  # agent 가 episode 별로 얻은 score 기록
 steps = []  # agent 가 episode 별로 목표를 찾아간 step 수 변화 기록
-greedy = [] # epsilon delay history 기록
+greedy = [] # epsilon decay history 기록
 
 #Loop for each episode:
 for episode in range(n_episodes):
-    if episode > n_episodes * 0.99:
+    if episode > n_episodes * 0.995:
         env = gym.make('Taxi-v3', render_mode="human")
     #Initialize S
     s, _ = env.reset()
     step = 0
     score = 0
     #Loop for each step of episode:
-    terminated, truncated = False, False
-    while not terminated and not truncated:
+    while True:
         step += 1
         # Choose A from S using policy derived from Q (eg. e-greedy)
         # behavior policy : e-greedy
@@ -76,7 +74,10 @@ for episode in range(n_episodes):
         #Q(S,A) <- Q(S,A) + alpha[R + gamma*max_aQ(S',a) - Q(S, A)]
         #자신이 따르는 정책에 상관없이 최적 행동가치함수 q*를 직접 근사
         # target policy : greedy policy
-        Q[s][a] = Q[s][a] + alpha * (r + gamma * np.max(Q[s_]) - Q[s][a])
+        Q[s][a] = Q[s][a] + ALPHA * (r + GAMMA * np.max(Q[s_]) - Q[s][a])
+        
+        if terminated or truncated:
+            break
         
         #S <- S'
         s = s_ 
@@ -87,20 +88,18 @@ for episode in range(n_episodes):
     greedy.append(epsilon)
     
     if episode % 100 == 0:
-        print("last 100 평균 score is %s" % np.mean(scores[-100:]))
-    
-print('평균 steps : {}'.format(np.mean(steps)))
+        print(f"최근 100 episode 평균 score = {np.mean(scores[-100:])}, 평균 step = {np.mean(steps[-100:])}")
 
 plt.bar(np.arange(len(steps)), steps)
-plt.title("Steps of Taxi-v3- gamma: {}, alpha: {}".format(
-             gamma, alpha))
+plt.title("Steps of Taxi-v3- GAMMA: {}, ALPHA: {}".format(
+    GAMMA, ALPHA))
 plt.xlabel('episode')
 plt.ylabel('steps per episode')
 plt.show()
 
 plt.bar(np.arange(len(scores)), scores)
-plt.title("Scores of Taxi-v3- gamma: {}, alpha: {}".format(
-                    gamma, alpha))
+plt.title("Scores of Taxi-v3- GAMMA: {}, ALPHA: {}".format(
+                    GAMMA, ALPHA))
 plt.xlabel('episode')
 plt.ylabel('score per episode')
 plt.show()

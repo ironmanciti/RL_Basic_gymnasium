@@ -13,20 +13,9 @@ import matplotlib.pyplot as plt
 policy = {0: 1, 1: 2, 2: 1, 3: 0, 4: 1, 6: 1,
           8: 2, 9: 1, 10: 1, 13: 2, 14: 2}
 
-stochastic = False
 with_policy = True
-mode = None
-if stochastic: # stochastic environment
-    env = gym.make('FrozenLake-v1',
-                   desc=None,
-                   map_name="4x4",
-                   is_slippery=True)
-else:  # deterministic environment
-    env = gym.make('FrozenLake-v1',
-                   desc=None,
-                   map_name="4x4",
-                   is_slippery=False)
-
+is_slippery = True
+env = gym.make('FrozenLake-v1', map_name="4x4", is_slippery=is_slippery)
 n_games = 100
 win_pct = []
 scores = []
@@ -57,5 +46,5 @@ plt.plot(win_pct)
 plt.xlabel('episode')
 plt.ylabel('success ratio')
 plt.title('With Policy: average success ratio of last 10 games\n - {}'
-          .format('Stochastic Env' if stochastic else 'Deterministic Env'))
+          .format('Slippery Env' if is_slippery else 'Deterministic Env'))
 plt.show()

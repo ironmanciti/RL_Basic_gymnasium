@@ -10,34 +10,29 @@ import torch.optim as optim
 import torch
 import matplotlib
 
-env_name = 'LunarLander-v2' #'MountainCar-v0' #'CartPole-v1'
+env_name = 'MountainCar-v0' #'CartPole-v1' 
 
 env = gym.make(env_name)
 
-seed_val = 23
-torch.manual_seed(seed_val)
-random.seed(seed_val)
 #--- hyper-parameters -----
-num_episodes = 200
-gamma = 0.99
+num_episodes = 200  # 'CartPole-v1' 200, 'MountainCar-v0' 200
+GAMMA = 0.99
 learning_rate = 0.001
 hidden_layer = 120
 replay_memory_size = 50_000
 batch_size = 128
 
-EPS_START = 0.9
-EPS_END = 0.05
-EPS_DECAY = 200
+epsilon_start = 0.9
+epsilon_end = 0.05
+epsilon_decay = 200
 
 target_nn_update_frequency = 10
 clip_error = False
 #---------------------
-# device = "cuda:0" if torch.cuda.is_available() else "cpu"
 device = "cpu"
-print(f"device = {device}")
 
-n_inputs = env.observation_space.shape[0]  # 4
-n_outputs = env.action_space.n  # 2
+n_inputs = env.observation_space.shape[0] 
+n_outputs = env.action_space.n  
 
 class ExperienceReplay:
     def __init__(self, capacity):
@@ -76,8 +71,8 @@ class NeuralNetwork(nn.Module):
 
 def select_action(state, steps_done):
     sample = random.random()
-    eps_threshold = EPS_END + (EPS_START - EPS_END) * \
-        math.exp(-1. * steps_done / EPS_DECAY)
+    eps_threshold = epsilon_end + (epsilon_start - epsilon_end) * \
+        math.exp(-1. * steps_done / epsilon_decay)
 
     if sample > eps_threshold:
         with torch.no_grad():
@@ -106,8 +101,8 @@ total_steps = 0
 start_time = time.time()
 
 #for episode = 1, M do
-for i_episode in range(num_episodes):
-    if i_episode < num_episodes * 0.05 or i_episode > num_episodes * 0.95:
+for episode in range(num_episodes):
+    if episode > num_episodes * 0.98:
         env = gym.make(env_name, render_mode="human")
     else:
         env = gym.make(env_name)
@@ -134,8 +129,7 @@ for i_episode in range(num_episodes):
 
         if len(memory) >= batch_size:
             #Sample random minibatch of transitions(f_j,a_j,r_j,f_j+1) from D
-            states, actions, new_states, rewards, dones = memory.sample(
-                batch_size)
+            states, actions, new_states, rewards, dones = memory.sample(batch_size)
 
             states = torch.Tensor(states).to(device)
             actions = torch.LongTensor(actions).to(device)
@@ -149,7 +143,7 @@ for i_episode in range(num_episodes):
             # r_j + gamma*max_a'Q(f_j+1, a';theta) otherwise
             # dones가 batch_size array 이므로 dones가 1 인경우의 reward만 남김
             y_target = rewards + \
-                (1 - dones) * gamma * torch.max(new_action_values, 1)[0]
+                (1 - dones) * GAMMA * torch.max(new_action_values, 1)[0]
             y_pred = Q(states).gather(1, actions.unsqueeze(1))
 
             #Perform a gradient descent reward on (y_j - Q(f_j+1, a_j;theta))^2
@@ -169,16 +163,17 @@ for i_episode in range(num_episodes):
 
         if done:
             reward_history.append(reward)
-            print(f"{i_episode} episode finished after {reward:.2f} rewards")
+            print(f"{episode} episode finished after {reward:.2f} rewards")
             # scheduler.step()
             break
 
 print("Average rewards: %.2f" % (sum(reward_history)/num_episodes))
 print("Average of last 100 episodes: %.2f" % (sum(reward_history[-50:])/50))
 print("---------------------- Hyper parameters --------------------------------------")
-print(f"gamma:{gamma}, learning rate: {learning_rate}, hidden layer: {hidden_layer}")
+print(f"GAMMA:{GAMMA}, learning rate: {learning_rate}, hidden layer: {hidden_layer}")
 print(f"replay_memory: {replay_memory_size}, batch size: {batch_size}")
-print(f"EPS_START: {EPS_START}, EPS_END: {EPS_END}, EPS_DECAY: {EPS_DECAY}")
+print(f"epsilon_start: {epsilon_start}, epsilon_end: {epsilon_end}, " +
+      f"epsilon_decay: {epsilon_decay}")
 print(f"update frequency: {target_nn_update_frequency}, clipping: {clip_error}")
 elapsed_time = time.time() - start_time
 print(f"Time Elapsed : {elapsed_time//60} min {elapsed_time%60:.0} sec")

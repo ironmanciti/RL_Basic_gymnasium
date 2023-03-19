@@ -21,7 +21,7 @@ env.P[0][0]
 import gymnasium as gym
 import numpy as np
 
-env = gym.make('FrozenLake-v1', is_slippery=False)
+env = gym.make('FrozenLake-v1', is_slippery=True)
 
 GAMMA = 1.0
 THETA = 1e-5
@@ -61,7 +61,7 @@ while not policy_stable:
     #3. Policy Improvement
     #policy_stable <- true   
     policy_stable = True
-    old_policy = pi
+    old_pi = pi
     #For each s:
     for s in range(num_states):
         # pi_s <- argmax_a(sum(p(s',r|s,a)*[r + gamma*V(s')]))
@@ -73,10 +73,10 @@ while not policy_stable:
         new_action = np.argmax(new_action_values)
         pi[s] = np.eye(num_actions)[new_action]
 
-    if old_policy.all() != pi.all():
+    if old_pi.all() != pi.all():
         policy_stable = False
     #If policy-stable. then stop and return V and pi; else go to 2.
 
-print("Optimal Value = \n", V.reshape(4, 4))
+print("Optimal Value Function = \n", V.reshape(4, 4))
 print("Optimal Policy = \n", pi)
 print("Optimal Action = \n", np.argmax(pi, axis=1).reshape(4, 4))
