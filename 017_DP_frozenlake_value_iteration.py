@@ -31,7 +31,6 @@ num_actions = env.action_space.n
 transitions = env.P 
 
 # 1. initialize an array V(s) = 0 for all s in S+
-# and arbitrary pi(s) for all a in A+ for all s in S+
 V = np.zeros(num_states)
 
 #Loop

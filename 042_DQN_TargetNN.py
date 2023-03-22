@@ -15,16 +15,16 @@ env_name = 'MountainCar-v0' #'CartPole-v1'
 env = gym.make(env_name)
 
 #--- hyper-parameters -----
-num_episodes = 200  # 'CartPole-v1' 200, 'MountainCar-v0' 200
+num_episodes = 300  # 'CartPole-v1' 200, 'MountainCar-v0' 300
 GAMMA = 0.99
 learning_rate = 0.001
 hidden_layer = 120
 replay_memory_size = 50_000
 batch_size = 128
 
-epsilon_start = 0.9
-epsilon_end = 0.05
-epsilon_decay = 200
+e_start = 0.9
+e_end = 0.05
+e_decay = 200
 
 target_nn_update_frequency = 10
 clip_error = False
@@ -70,11 +70,10 @@ class NeuralNetwork(nn.Module):
         return output
 
 def select_action(state, steps_done):
-    sample = random.random()
-    eps_threshold = epsilon_end + (epsilon_start - epsilon_end) * \
-        math.exp(-1. * steps_done / epsilon_decay)
+    e_threshold = e_end + (e_start - e_end) * \
+        math.exp(-1. * steps_done/e_decay)
 
-    if sample > eps_threshold:
+    if random.random() > e_threshold:
         with torch.no_grad():
             state = torch.Tensor(state).to(device)
             action_values = Q(state)
@@ -102,7 +101,7 @@ start_time = time.time()
 
 #for episode = 1, M do
 for episode in range(num_episodes):
-    if episode > num_episodes * 0.98:
+    if episode > num_episodes * 0.95:
         env = gym.make(env_name, render_mode="human")
     else:
         env = gym.make(env_name)
@@ -172,8 +171,8 @@ print("Average of last 100 episodes: %.2f" % (sum(reward_history[-50:])/50))
 print("---------------------- Hyper parameters --------------------------------------")
 print(f"GAMMA:{GAMMA}, learning rate: {learning_rate}, hidden layer: {hidden_layer}")
 print(f"replay_memory: {replay_memory_size}, batch size: {batch_size}")
-print(f"epsilon_start: {epsilon_start}, epsilon_end: {epsilon_end}, " +
-      f"epsilon_decay: {epsilon_decay}")
+print(f"epsilon_start: {e_start}, epsilon_end: {e_end}, " +
+      f"epsilon_decay: {e_decay}")
 print(f"update frequency: {target_nn_update_frequency}, clipping: {clip_error}")
 elapsed_time = time.time() - start_time
 print(f"Time Elapsed : {elapsed_time//60} min {elapsed_time%60:.0} sec")
