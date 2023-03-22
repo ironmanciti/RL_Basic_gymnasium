@@ -12,7 +12,7 @@ import time
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 
-ENV_NAME = 'LunarLander-v2'
+ENV_NAME = 'CartPole-v1'
 env = gym.make(ENV_NAME)
 
 action_space = np.arange(env.action_space.n)
@@ -29,8 +29,10 @@ class PolicyNetwork(nn.Module):
         x = F.softmax(self.fc2(x), dim=-1)
         return x
 
+
 #Initialize the parameters theta
-pi = PolicyNetwork(input_dims=env.observation_space.shape, n_actions=env.action_space.n).to(device)
+pi = PolicyNetwork(input_dims=env.observation_space.shape,
+                   n_actions=env.action_space.n).to(device)
 
 #Select step-size parameters 0<alpha<1
 alpha = 0.001      #0.001 

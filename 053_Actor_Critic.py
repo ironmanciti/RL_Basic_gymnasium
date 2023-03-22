@@ -12,17 +12,12 @@ import time
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 
-#env_name = 'Pendulum-v1'
 env_name = 'CartPole-v1'
 # env_name = 'LunarLander-v2'
 env = gym.make(env_name)
 
-if env_name == 'Pendulum-v1':
-    n_actions = env.action_space.shape[0]  
-    action_space = np.arange(env.action_space.shape[0]) 
-else:
-    n_actions = env.action_space.n
-    action_space = np.arange(env.action_space.n)
+n_actions = env.action_space.n
+action_space = np.arange(env.action_space.n)
     
 print(n_actions)
 
